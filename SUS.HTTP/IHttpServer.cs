@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace SUS.HTTP
 {
@@ -6,6 +7,6 @@ namespace SUS.HTTP
     {
         void AddRoute(string path, Func<HttpRequest, HttpResponse> action);
 
-        void Start(int port);
+        Task StartAsync(int port);
     }
 }
