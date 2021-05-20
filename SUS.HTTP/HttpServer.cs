@@ -10,7 +10,7 @@ namespace SUS.HTTP
 {
     public class HttpServer : IHttpServer
     {
-        IDictionary<string, Func<HttpRequest, HttpResponse>> routeTable = 
+        IDictionary<string, Func<HttpRequest, HttpResponse>> routeTable =
             new Dictionary<string, Func<HttpRequest, HttpResponse>>();
 
         public void AddRoute(string path, Func<HttpRequest, HttpResponse> action)
@@ -28,7 +28,7 @@ namespace SUS.HTTP
         public async Task StartAsync(int port)
         {
             TcpListener tcpListner = new TcpListener(IPAddress.Loopback, port);
-            tcpListner.Start(); 
+            tcpListner.Start();
             while (true)
             {
                 TcpClient tcpClient = await tcpListner.AcceptTcpClientAsync();
@@ -48,6 +48,7 @@ namespace SUS.HTTP
                     int position = 0;
                     byte[] buffer = new byte[HttpConstants.BufferSize];
 
+                    // Process Http Request
                     while (true)
                     {
                         int count = await stream.ReadAsync(buffer, position, buffer.Length);
@@ -69,24 +70,28 @@ namespace SUS.HTTP
 
                     var requestAsString = Encoding.UTF8.GetString(data.ToArray());
                     var request = new HttpRequest(requestAsString);
+                    Console.WriteLine(request.Method + " " + request.Path + " => Headers: " + request.Headers.Count);
 
-                    Console.WriteLine(requestAsString);
+                    HttpResponse response;
 
-                    // TODO: extract info
+                    if (routeTable.ContainsKey(request.Path))
+                    {
+                        var action = this.routeTable[request.Path];
+                        response = action(request);
+                    }
+                    else
+                    {
+                        response = new HttpResponse("text/html", new byte[0], Enums.HttpStatusCode.NotFound);
+                    }
 
-                    var responseHtml = "<h1> Welcome </h1>" + request.Headers.FirstOrDefault(x => x.Name == "User-Agent")?.Value;
-                    var responseBodyBytes = Encoding.UTF8.GetBytes(responseHtml);
+                    response.Headers.Add(new Header("Server", "SUS Server 1.0"));
+                    response.Cookies.Add(new ResponseCookie("sid", Guid.NewGuid().ToString())
+                    { HttpOnly = true, MaxAge = 60 * 24 * 60 * 60 });
 
-                    var responseHttp = "HTTP/1.1 200 OK" + HttpConstants.NewLine +
-                        "Serve: SUS Server 1.0" + HttpConstants.NewLine +
-                        "Content-type: text/html" + HttpConstants.NewLine +
-                        "Content-Length: " + responseBodyBytes.Length + HttpConstants.NewLine +
-                        HttpConstants.NewLine;
-
-                    var responseHeaderBytes = Encoding.UTF8.GetBytes(responseHttp);
+                    var responseHeaderBytes = Encoding.UTF8.GetBytes(response.ToString());
 
                     await stream.WriteAsync(responseHeaderBytes, 0, responseHeaderBytes.Length);
-                    await stream.WriteAsync(responseBodyBytes, 0, responseBodyBytes.Length);
+                    await stream.WriteAsync(response.Body, 0, response.Body.Length);
                 }
             }
             catch (Exception ex)
@@ -94,7 +99,7 @@ namespace SUS.HTTP
                 Console.WriteLine(ex);
             }
 
-            
+
         }
     }
 }
