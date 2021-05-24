@@ -1,4 +1,5 @@
 ﻿using SUS.HTTP;
+using SUS.HTTP.Enums;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -28,6 +29,14 @@ namespace SUS.MvcFramework
         {
             var fileBytes = System.IO.File.ReadAllBytes(path);
             var response = new HttpResponse(contentType, fileBytes);
+
+            return response;
+        }
+
+        public HttpResponse Redirect(string url)
+        {
+            var response = new HttpResponse(HttpStatusCode.Found);
+            response.Headers.Add(new Header("Location", url));
 
             return response;
         }

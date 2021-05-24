@@ -11,6 +11,7 @@ namespace SUS.HTTP.Enums
         Ok = 200,
         NotFound = 404,
         MovedPermanently = 301,
+        Found = 302,
         TemporaryRedirect = 307,
         ServerError = 500
     }
