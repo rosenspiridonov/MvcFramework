@@ -1,7 +1,10 @@
-﻿using MyFirstMvcApp.Controllers;
-using SUS.HTTP;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+
+using MyFirstMvcApp.Controllers;
+using SUS.HTTP;
+using SUS.MvcFramework;
 
 namespace MyFirstMvcApp
 {
@@ -9,15 +12,23 @@ namespace MyFirstMvcApp
     {
         static async Task Main(string[] args)
         {
-            IHttpServer server = new HttpServer();
+            List<Route> routeTable = new List<Route>();
 
-            server.AddRoute("/", new HomeController().Index);
-            server.AddRoute("/favicon.ico", new StaticFilesController().Favicon);
-            server.AddRoute("/about", new HomeController().About);
-            server.AddRoute("/users/login", new UserController().Login);
-            server.AddRoute("/users/register", new UserController().Register);
-            Process.Start(@"C:\Program Files\Google\Chrome\Application\chrome.exe", "http://localhost:80");
-            await server.StartAsync(80);
+            routeTable.Add(new Route("/", new HomeController().Index));
+            routeTable.Add(new Route("/users/login", new UsersController().Login));
+            routeTable.Add(new Route("/users/register", new UsersController().Register));
+            routeTable.Add(new Route("/cards/add", new CardsController().Add));
+            routeTable.Add(new Route("/cards/all", new CardsController().All));
+            routeTable.Add(new Route("/cards/collection", new CardsController().Collection));
+
+            routeTable.Add(new Route("/favicon.ico", new StaticFilesController().Favicon));
+            routeTable.Add(new Route("/css/bootstrap.min.css", new StaticFilesController().BootstrapCss));
+            routeTable.Add(new Route("/css/custom.css", new StaticFilesController().CustomCss));
+            routeTable.Add(new Route("/js/bootstrap.bundle.min.js", new StaticFilesController().BootstrapJs));
+            routeTable.Add(new Route("/js/custom.js", new StaticFilesController().CustomJs));
+
+
+            await Host.CreateHostAsync(routeTable, 80);
         }
     }
 }
