@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using SUS.HTTP.Enums;
 
 namespace SUS.HTTP
@@ -16,6 +17,25 @@ namespace SUS.HTTP
             var lines = requestString.Split(new string[] { HttpConstants.NewLine }, System.StringSplitOptions.None);
 
             // GET /page HTTP/1.1
+            var body = ParseHeaders(lines);
+
+            if (this.Headers.Any(x => x.Name == HttpConstants.RequestCookieHeader))
+            {
+                var cookiesAsString = this.Headers.FirstOrDefault(x => x.Name == HttpConstants.RequestCookieHeader).Value;
+
+                var cookies = cookiesAsString.Split(new string[] { "; " }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var cookieAsString in cookies)
+                {
+                    this.Cookies.Add(new Cookie(cookieAsString));
+                }
+            }
+
+            this.Body = body;
+        }
+
+        private string ParseHeaders(string[] lines)
+        {
             var headerLine = lines[0];
             var headerLineParts = headerLine.Split(' ');
             this.Method = (HttpMethod)Enum.Parse(typeof(HttpMethod), headerLineParts[0], true);
@@ -46,20 +66,7 @@ namespace SUS.HTTP
                 }
             }
 
-
-            if (this.Headers.Any(x => x.Name == HttpConstants.RequestCookieHeader))
-            {
-                var cookiesAsString = this.Headers.FirstOrDefault(x => x.Name == HttpConstants.RequestCookieHeader).Value;
-
-                var cookies = cookiesAsString.Split(new string[] { "; " }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (var cookieAsString in cookies)
-                {
-                    this.Cookies.Add(new Cookie(cookieAsString));
-                }
-            }
-
-            this.Body = bodyBuilder.ToString();
+            return bodyBuilder.ToString();
         }
 
         public string Path { get; set; }

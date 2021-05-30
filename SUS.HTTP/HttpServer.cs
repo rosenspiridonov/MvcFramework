@@ -92,8 +92,6 @@ namespace SUS.HTTP
             {
                 Console.WriteLine(ex);
             }
-
-
         }
     }
 }
