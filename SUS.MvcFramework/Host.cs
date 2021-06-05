@@ -69,7 +69,7 @@ namespace SUS.MvcFramework
                     {
                         var instance = Activator.CreateInstance(controllerType) as Controller;
                         instance.Request = request;
-                        var response = method.Invoke(instance, new[] { request }) as HttpResponse;
+                        var response = method.Invoke(instance, new object[0]) as HttpResponse;
 
                         return response;
                     }));
