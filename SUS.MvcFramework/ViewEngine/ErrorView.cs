@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -15,19 +16,16 @@ namespace SUS.MvcFramework.ViewEngine
             this.csharpCode = csharpCode;
         }
 
-        public string ExecuteTemplate(object viewModel)
+        public string ExecuteTemplate(object viewModel, string user)
         {
-            StringBuilder html = new();
-
-            html.AppendLine($"<h1>View compile time {errors.Count()} errors:</h1><ul>");
-
+            var html = new StringBuilder();
+            html.AppendLine($"<h1>View compile {this.errors.Count()} errors:</h1><ul>");
             foreach (var error in this.errors)
             {
                 html.AppendLine($"<li>{error}</li>");
             }
 
             html.AppendLine($"</ul><pre>{csharpCode}</pre>");
-
             return html.ToString();
         }
     }

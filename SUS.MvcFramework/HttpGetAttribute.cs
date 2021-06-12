@@ -1,4 +1,4 @@
-﻿using SUS.HTTP.Enums;
+﻿using SUS.HTTP;
 
 namespace SUS.MvcFramework
 {
@@ -13,6 +13,6 @@ namespace SUS.MvcFramework
             this.Url = url;
         }
 
-        public override HttpMethod Method => HttpMethod.GET;
+        public override HttpMethod Method => HttpMethod.Get;
     }
 }

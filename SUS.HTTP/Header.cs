@@ -6,18 +6,18 @@ namespace SUS.HTTP
     {
         public Header(string name, string value)
         {
-            Name = name;
-            Value = value;
+            this.Name = name;
+            this.Value = value;
         }
 
         public Header(string headerLine)
         {
-            var headerParts = headerLine.Split(new string[] { ": " }, 2, StringSplitOptions.None);
-
+            var headerParts = headerLine.Split(new string[] { ": " },
+                2, StringSplitOptions.None);
             this.Name = headerParts[0];
             this.Value = headerParts[1];
         }
-    
+
         public string Name { get; set; }
 
         public string Value { get; set; }

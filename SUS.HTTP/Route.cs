@@ -1,5 +1,6 @@
-﻿using SUS.HTTP.Enums;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace SUS.HTTP
 {
@@ -7,9 +8,9 @@ namespace SUS.HTTP
     {
         public Route(string path, HttpMethod method, Func<HttpRequest, HttpResponse> action)
         {
-            Path = path;
-            Method = method;
-            Action = action;
+            this.Path = path;
+            this.Method = method;
+            this.Action = action;
         }
 
         public string Path { get; set; }

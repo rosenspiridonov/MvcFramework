@@ -1,19 +1,17 @@
-﻿using System;
-
-namespace SUS.HTTP
+﻿namespace SUS.HTTP
 {
     public class Cookie
     {
         public Cookie(string name, string value)
         {
-            Name = name;
-            Value = value;
+            this.Name = name;
+            this.Value = value;
         }
 
-        public Cookie(string cookieLine)
+        // _ga=GA1.2.198505690.1579630167
+        public Cookie(string cookieAsString)
         {
-            var cookieParts = cookieLine.Split(new char[] { '=' }, 2);
-
+            var cookieParts = cookieAsString.Split(new char[] { '=' }, 2);
             this.Name = cookieParts[0];
             this.Value = cookieParts[1];
         }

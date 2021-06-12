@@ -1,5 +1,4 @@
-﻿using SUS.HTTP.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -23,12 +22,31 @@ namespace SUS.HTTP
 
             this.StatusCode = statusCode;
             this.Body = body;
-            this.Headers = new List<Header>()
+            this.Headers = new List<Header>
             {
-                new Header("Content-Type", contentType),
-                new Header("Content-Length", body.Length.ToString()),
+                { new Header("Content-Type", contentType) },
+                { new Header("Content-Length", body.Length.ToString()) },
             };
             this.Cookies = new List<Cookie>();
+        }
+
+        public override string ToString()
+        {
+            StringBuilder responseBuilder = new StringBuilder();
+            responseBuilder.Append($"HTTP/1.1 {(int)this.StatusCode} {this.StatusCode}" + HttpConstants.NewLine);
+            foreach (var header in this.Headers)
+            {
+                responseBuilder.Append(header.ToString() + HttpConstants.NewLine);
+            }
+
+            foreach (var cookie in this.Cookies)
+            {
+                responseBuilder.Append("Set-Cookie: " + cookie.ToString() + HttpConstants.NewLine);
+            }
+
+            responseBuilder.Append(HttpConstants.NewLine);
+
+            return responseBuilder.ToString();
         }
 
         public HttpStatusCode StatusCode { get; set; }
@@ -38,26 +56,5 @@ namespace SUS.HTTP
         public ICollection<Cookie> Cookies { get; set; }
 
         public byte[] Body { get; set; }
-
-        public override string ToString()
-        {
-            var sb = new StringBuilder();
-
-            sb.Append($"HTTP/1.1 {(int)StatusCode} {StatusCode}" + HttpConstants.NewLine);
-
-            foreach (var h in Headers)
-            {
-                sb.Append(h.ToString() + HttpConstants.NewLine);
-            }
-
-            foreach (var cookie in Cookies)
-            {
-                sb.Append("Set-Cookie: " + cookie.ToString() + HttpConstants.NewLine);
-            }
-
-            sb.Append(HttpConstants.NewLine);
-
-            return sb.ToString();
-        }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using SUS.HTTP;
-using SUS.HTTP.Enums;
 using SUS.MvcFramework.ViewEngine;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -9,6 +7,7 @@ namespace SUS.MvcFramework
 {
     public abstract class Controller
     {
+        private const string UserIdSessionName = "UserId";
         private SusViewEngine viewEngine;
 
         public Controller()
@@ -18,48 +17,71 @@ namespace SUS.MvcFramework
 
         public HttpRequest Request { get; set; }
 
-        public HttpResponse View(
+        protected HttpResponse View(
             object viewModel = null,
             [CallerMemberName]string viewPath = null)
         {
-            // Get and parse to HTML global layout
-            var layout = System.IO.File.ReadAllText("Views/Shared/_Layout.cshtml");
-            layout = layout.Replace("@RenderBody()", "___VIEW_GOES_HERE___");
-            layout = this.viewEngine.GetHtml(layout, null);
-
-            // Get and parse to HTML View content
             var viewContent = System.IO.File.ReadAllText(
-                "Views/" +
+                "Views/" + 
                 this.GetType().Name.Replace("Controller", string.Empty) + 
                 "/" + viewPath + ".cshtml");
-            viewContent = this.viewEngine.GetHtml(viewContent, viewModel);
+            viewContent = this.viewEngine.GetHtml(viewContent, viewModel, this.GetUserId());
 
-            // Fill body with parsed HTML
-            var responseHtml = layout.Replace("___VIEW_GOES_HERE___", viewContent);
+            var responseHtml = this.PutViewInLayout(viewContent, viewModel);
 
-            // Get body bytes
             var responseBodyBytes = Encoding.UTF8.GetBytes(responseHtml);
-
-            // Create new Http Response
             var response = new HttpResponse("text/html", responseBodyBytes);
-
             return response;
         }
 
-        public HttpResponse File(string path, string contentType)
+        protected HttpResponse File(string filePath, string contentType)
         {
-            var fileBytes = System.IO.File.ReadAllBytes(path);
+            var fileBytes = System.IO.File.ReadAllBytes(filePath);
             var response = new HttpResponse(contentType, fileBytes);
-
             return response;
         }
 
-        public HttpResponse Redirect(string url)
+        protected HttpResponse Redirect(string url)
         {
             var response = new HttpResponse(HttpStatusCode.Found);
             response.Headers.Add(new Header("Location", url));
-
             return response;
+        }
+
+        protected HttpResponse Error(string errorText)
+        {
+            var viewContent = $"<div class=\"alert alert-danger\" role=\"alert\">{errorText}</div>";
+            var responseHtml = this.PutViewInLayout(viewContent);
+            var responseBodyBytes = Encoding.UTF8.GetBytes(responseHtml);
+            var response = new HttpResponse("text/html", responseBodyBytes, HttpStatusCode.ServerError);
+            return response;
+        }
+
+        protected void SignIn(string userId)
+        {
+            this.Request.Session[UserIdSessionName] = userId;
+        }
+
+        protected void SignOut()
+        {
+            this.Request.Session[UserIdSessionName] = null;
+        }
+
+        protected bool IsUserSignedIn() =>
+            this.Request.Session.ContainsKey(UserIdSessionName) &&
+            this.Request.Session[UserIdSessionName] != null;
+
+        protected string GetUserId() =>
+            this.Request.Session.ContainsKey(UserIdSessionName) ?
+            this.Request.Session[UserIdSessionName] : null;
+
+        private string PutViewInLayout(string viewContent, object viewModel = null)
+        {
+            var layout = System.IO.File.ReadAllText("Views/Shared/_Layout.cshtml");
+            layout = layout.Replace("@RenderBody()", "____VIEW_GOES_HERE____");
+            layout = this.viewEngine.GetHtml(layout, viewModel, this.GetUserId());
+            var responseHtml = layout.Replace("____VIEW_GOES_HERE____", viewContent);
+            return responseHtml;
         }
     }
 }
