@@ -10,6 +10,13 @@ namespace MyFirstMvcApp.Controllers
             return this.View();
         }
 
+        [HttpPost("/Cards/Add")]
+        public HttpResponse DoAdd()
+        {
+            var request = this.Request;
+            return this.View();
+        }
+
         public HttpResponse All()
         {
             return this.View();

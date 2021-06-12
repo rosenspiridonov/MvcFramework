@@ -30,7 +30,7 @@ namespace SUS.MvcFramework
             // TODO: {controller}/{action}/{id}
             IHttpServer server = new HttpServer(routeTable);
 
-            Process.Start(@"C:\Program Files\Google\Chrome\Application\chrome.exe", "http://localhost:80");
+            //Process.Start(@"C:\Program Files\Google\Chrome\Application\chrome.exe", "http://localhost:80");
             await server.StartAsync(80);
         }
 
